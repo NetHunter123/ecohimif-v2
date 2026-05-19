@@ -1,0 +1,13 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "ecohimif-dev",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev", "--prefix", "app"],
+      "port": 3000,
+      "autoPort": true,
+      "cwd": "C:\\Claude\\ecohimif"
+    }
+  ]
+}
