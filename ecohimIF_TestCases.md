@@ -813,6 +813,86 @@
 
 ---
 
-**Дата:** 2026-04-28
-**Версія:** 1.0
+**Дата:** 2026-04-28 · оновлено 2026-05-19
+**Версія:** 1.1
 **Файл-партнер:** `ecohimIF_TZ.md` у тій самій папці
+
+---
+
+## Додаток A — Стан реалізації (станом на 2026-05-19)
+
+Цей розділ синхронізує тест-кейси з реальним станом коду після Phase 2-4 + полірування.
+
+### ✅ Повністю реалізовано і протестовано
+
+| Область | TC ID | Статус |
+|---|---|---|
+| Каталог: список, фільтри, теги, сортування, пагінація, пошук, empty-state | TC-CAT-001 ... 010 | ✅ Live з 31 продуктом |
+| Сторінка товару: галерея, variants, attributes, datasheets, related, JSON-LD, форма питання | TC-PROD-001 ... 014 | ✅ Live |
+| Анонімний кошик (localStorage + Zod, TTL 30 днів) | TC-CART-ANON-001 ... 008 | ✅ Live |
+| Авторизований кошик + merge при логіні | TC-CART-AUTH-001, 002 | ✅ Live (merge wired у LoginForm) |
+| Checkout 4 кроки з server action `createOrder` | TC-CHECK-001 ... 009, 012 | ✅ Live |
+| Auth: email+password, Google OAuth (account linking), password reset, email verification | TC-AUTH-001 ... 010 | ✅ Live |
+| Kabinet: profile, orders list+detail+ТТН, повідомлення | TC-KAB-001 ... 009 | ✅ Live |
+| Admin: dashboard, products CRUD, categories CRUD, orders + ТТН + auto-email, messages inbox + reply, users role mgmt | TC-ADM-001 ... 018 | ✅ Live |
+| Система повідомлень (contact, product question, оператор reply) | TC-MSG-001 ... 007 | ✅ Live з honeypot |
+| Order statuses + email при зміні | TC-ORD-001 ... 010 | ✅ Live (UK/DE/EN templates) |
+| Nova Poshta API (autocomplete міст + відділень з кешем) | TC-NP-001 ... 007 | ✅ Live |
+| i18n UK/DE/EN, hreflang | TC-I18N-001 ... 010 | ✅ Live, dropdown LocaleSwitcher |
+| Theme light/dark з View Transitions API | TC-THEME-001 ... 005 | ✅ Live |
+| Legal: Privacy/Terms/Impressum (draft контент, потрібен юрист) | TC-LEGAL-001 ... 008 | ✅ Draft live |
+| Security headers + CSRF (Better Auth SameSite cookies) | TC-SEC-001 ... 010 | ✅ Live |
+
+### 🔧 Часткова реалізація / TODO для production
+
+| TC | Поточний стан | TODO для production |
+|---|---|---|
+| TC-PROD-002 photo gallery | Один primaryImage + 5 thumbnails (без zoom-lightbox) | Додати fullscreen lightbox для повних зображень |
+| TC-PROD-003 photo zoom | Не реалізовано | Phase 5 — embla-carousel + zoom |
+| TC-PROD-011 form-generated PDF datasheet | ✅ /api/datasheet/[id]/pdf через @react-pdf/renderer | — |
+| TC-CHECK-010 NP API timeout fallback | ✅ 5-сек timeout + console error + plain inputs | — |
+| TC-CHECK-011 guest → register pitch на success-page | Не реалізовано | Додати banner з 1-click register |
+| TC-AUTH-011 rate-limit на login | Не реалізовано | Додати Upstash Redis або in-memory limiter |
+| TC-ADM-007 image upload | ✅ `/api/upload` (5MB max, MIME validation, role check) — зберігає у `/public/uploads/`. На production swap на Vercel Blob | Підключити Vercel Blob для production |
+| TC-ADM-008 datasheet upload | Можна задати `fileUrl` ручну, UI upload — TODO | Reuse `ImageUploader` для PDF |
+| TC-ADM-015 PDF invoice | Не реалізовано | Реюз `renderDatasheetPdf` патерн |
+| TC-NP-003 ТТН status cron | Не реалізовано | Phase 7 — background worker |
+| TC-PERF-001 Lighthouse 100/100/100/100 | Не повністю optimized (LCP покладається на seed data URIs) | Замінити SVG data-URI на реальні JPG/AVIF + sharp оптимізація |
+| TC-A11Y-001 skip-to-content link | ✅ Live | — |
+| TC-A11Y-003 cart drawer focus trap | ✅ ESC close + onclick-overlay close. Tab cycle — частково (без focus-trap libraries) | Додати focus-trap для повної відповідності WAI-ARIA |
+| TC-A11Y-007 aria-describedby | ✅ Через primitives Input/Select/Textarea (auto useId) | — |
+| TC-SEC-006 rate-limit на /api/auth | Better Auth дефолти (anti-brute по email) | Додати IP-rate-limit на reverse proxy |
+| TC-EDGE-006 Resend bounce webhook | Не імплементовано | Підключити Resend webhook → mark message.emailSent |
+
+### 🆕 Реалізовано понад ТЗ
+
+| Feature | Файл |
+|---|---|
+| LocaleSwitcher як dropdown з прапорами і native names | `src/components/controls/LocaleSwitcher.tsx` |
+| LayoutChrome — мінімальний chrome на auth-сторінках без header/footer | `src/components/layout/LayoutChrome.tsx` |
+| View Transitions API при перемиканні теми (radial reveal) | `src/components/controls/ThemeToggle.tsx` |
+| Magnetic hover на hero CTAs | `src/components/fx/Magnetic.tsx` |
+| Dev-fallback для emails: якщо `RESEND_API_KEY` пустий — лог у консоль | `src/lib/email/send.ts` |
+| Drizzle Studio як `yarn db:studio` | `package.json` |
+| Error boundaries для /admin, /kabinet — graceful fallback при недоступній БД | `src/app/[locale]/admin/error.tsx`, `kabinet/error.tsx` |
+| Account linking (Google + email → один акаунт) | `src/lib/auth.ts` |
+
+### Облікові дані для тестування (dev)
+
+| Роль | Email | Пароль |
+|---|---|---|
+| Admin | `admingalerovich@gmail.com` | `AdminGalerovich03322475` |
+| Customer | `customergalerovich@gmail.com` | `CustomerGalerovich03322475` |
+
+### Як запустити повну прогонку
+
+```powershell
+cd C:\Claude\ecohimif\app
+yarn db:push          # створити таблиці
+yarn db:seed          # 5 категорій + 31 продукт + promote admin
+yarn dev              # на :3000 (Google OAuth redirect_uri в Google Console)
+```
+
+Після того — `/uk/admin` як admin → перевірити dashboard з KPI; `/uk` як customer → каталог → cart → checkout (NP autocomplete) → confirm → email у /uk/kabinet/zamovlennya.
+
+---

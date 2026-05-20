@@ -136,16 +136,77 @@ app/
 
 ---
 
-## Що робити далі (Phase 2)
+## Поточний стан: Phase 2 + 3 + 4 РЕАЛІЗОВАНО ✅ (потребує PostgreSQL)
 
-З ТЗ `ecohimIF_TZ.md` — Phase 2: Catalog & Products:
-- [ ] Схема даних товарів (Zod, TypeScript types)
-- [ ] Статичні дані / MDX або JSON для початкового каталогу
-- [ ] Сторінка каталогу `/[locale]/kataloh/page.tsx` з фільтрацією
-- [ ] Сторінка товару `/[locale]/kataloh/[slug]/page.tsx`
-- [ ] Компоненти: ProductCard, ProductGrid, CategoryFilter, PriceRange
-- [ ] Кошик (localStorage або server state)
-- [ ] Пошук
+**Phase 2 — Каталог & DB:**
+- ✅ Drizzle schema (users/sessions/accounts/verifications + categories/products/variants/datasheets + orders/orderItems/cartItems + messages/messageReplies) — `src/lib/db/schema.ts`
+- ✅ PostgreSQL client + `globalThis`-pool — `src/lib/db/client.ts`
+- ✅ Seed-data: 31 продукт у 5 категоріях (добрива × 8, клеї × 6, ґрунтовки × 5, пивоварна × 7, побутова хімія × 5) з варіантами/атрибутами/тегами — `src/lib/db/seed-data.ts`
+- ✅ `/[locale]/katalog` — фільтри (категорія, теги, ціна, в наявності), сортування, search-autocomplete, пагінація
+- ✅ `/[locale]/katalog/[slug]` — галерея, variant-selector, attributes-table, datasheets, related, JSON-LD, "запитання про товар"
+- ✅ Компоненти: ProductCard, FilterBar, SortBar, Pagination, SearchAutocomplete
+
+**Phase 3 — Cart + Auth + Orders:**
+- ✅ Анонімний кошик (localStorage + Zod, TTL=30 днів) — `src/lib/cart/store.ts`
+- ✅ Hydrated cart provider з API `/api/cart/hydrate` — `src/lib/cart/hydrated.tsx`
+- ✅ CartDrawer (slide-out, focus-trap, ESC, +/−, видалення)
+- ✅ CartIconButton з badge у Header
+- ✅ Checkout `/[locale]/oformlennya` — 4 кроки (Контакти → Доставка → Оплата → Підтвердження) + Stepper + summary sidebar
+- ✅ Server Action `createOrder` — guest + authenticated; email клієнту + оператору (Resend або dev-stub)
+- ✅ `/[locale]/oformlennya/dyakuyemo?order=EH-...` — success-сторінка
+- ✅ Better Auth: email+password + Google OAuth + email-verification + password-reset
+- ✅ `/uvijty`, `/reestratsia`, `/vidnovyty-parol`, `/skydanya-parolyu`, merge анонімного кошика при логіні
+- ✅ `/[locale]/kabinet` — Profile, Orders (list + detail з ТТН-лінком), Messages
+
+**Phase 4 — Admin Panel (role: admin / operator):**
+- ✅ `/[locale]/admin` — layout з role-guard, dashboard з KPI (нові, в роботі, виторг 7д, активних, непрочитані повідомлення)
+- ✅ `/admin/produkty` — список + edit-форма (динамічні атрибути, теги-autocomplete, variants-table, image URL, isActive/isFeatured)
+- ✅ `/admin/kategorii` — CRUD inline
+- ✅ `/admin/zamovlennya` — фільтри по статусу + OrderStatusForm (статус, ТТН → авто-email клієнту, internal notes)
+- ✅ `/admin/povidomlennya` — inbox з reply через email (reply-to=operator) + mark read/unread
+- ✅ `/admin/koristuvachi` — список + role switch (тільки для admin)
+
+**Email система (Resend):**
+- ✅ Шаблони UK/DE/EN для: order-confirmation, operator-new-order, status-update, contact-form-notification, operator-reply, verify-email, password-reset
+- ✅ Dev-fallback: якщо `RESEND_API_KEY` пустий — лист логується в консоль
+
+**Header upgrade:**
+- ✅ CartIconButton з лайв-badge
+- ✅ AccountButton dropdown (Профіль / Адмінка / Вийти)
+
+---
+
+## 🛠️ Setup для запуску
+
+```bash
+cd app
+yarn install        # вже встановлено
+
+# 1. Запустити PostgreSQL (приклад через Docker)
+docker run -d --name ecohimif-pg -p 5432:5432 \
+  -e POSTGRES_PASSWORD=postgres \
+  -e POSTGRES_DB=ecohimif postgres:16
+
+# 2. Переконатись що .env.local має правильний DATABASE_URL
+# DATABASE_URL=postgresql://postgres:postgres@localhost:5432/ecohimif
+
+# 3. Створити таблиці
+yarn db:push
+
+# 4. Заповнити каталог
+yarn db:seed
+
+# 5. (опційно) Google OAuth — додати GOOGLE_CLIENT_ID/SECRET у .env.local
+# 6. (опційно) Resend — додати RESEND_API_KEY
+
+# 7. Запуск
+yarn dev --port 3010
+```
+
+**Перший адмін:**
+1. Зареєструйся через `/uk/reestratsia` з email `admin@ecohimif.ua` (або інший, що в `SEED_ADMIN_EMAIL` env)
+2. Перезапусти `yarn db:seed` — скрипт промоутне цього user'а до role=admin
+3. Відкрий `/uk/admin`
 
 ---
 
