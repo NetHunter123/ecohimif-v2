@@ -154,7 +154,8 @@ app/
 - ✅ Checkout `/[locale]/oformlennya` — 4 кроки (Контакти → Доставка → Оплата → Підтвердження) + Stepper + summary sidebar
 - ✅ Server Action `createOrder` — guest + authenticated; email клієнту + оператору (Resend або dev-stub)
 - ✅ `/[locale]/oformlennya/dyakuyemo?order=EH-...` — success-сторінка
-- ✅ Better Auth: email+password + Google OAuth + email-verification + password-reset
+- ✅ Better Auth: email+password + Google OAuth + email-verification (`requireEmailVerification: true`) + password-reset
+- ✅ Після реєстрації — екран "перевір пошту" (лист з підтвердженням); після логіну з невалідованим email — кнопка повторного надсилання листа
 - ✅ `/uvijty`, `/reestratsia`, `/vidnovyty-parol`, `/skydanya-parolyu`, merge анонімного кошика при логіні
 - ✅ `/[locale]/kabinet` — Profile, Orders (list + detail з ТТН-лінком), Messages
 
